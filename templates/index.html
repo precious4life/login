@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/tasks">Tasks</a>
+        </nav>
+    </header>
+
+    <h1>Hugedrop</h1>
+    <br>
+    <div class="intro">
+        <div class="mission">HUGEDROP MISSION</div> 
+        Hugedrop is a digital platform that brings collaboration and swift earning to its users through
+        daily tasks in the digital environment. Each participant would be able to accumulate points that would
+        later be converted to something huge.
+    </div>
+    <div class="img1">
+        <img src="/static/images/White-label crypto wallet development.jpeg" alt="">
+        <img src="/static/images/Ethereum Logo (ETH) - PNG Logo Vector Brand Downloads (SVG, EPS) - Copy - Copy.jpeg" alt="">
+        <img src="/static/images/Neon Ethereum futuristic logo.jpeg" alt="">
+    </div>
+
+    <section class="mem-pro">
+        {% if user %}
+            <p>Welcome, {{ user.username }}! <a href="/logout">Logout</a></p>
+        {% else %}
+            <form action="/login" method="POST">
+                <label>Username:</label><br>
+                <input type="text" name="username" required><br><br>
+                
+                <label>Password:</label><br>
+                <input type="password" name="password" required><br><br>
+                
+                <input type="submit" value="Login">
+            </form>
+            <p>
+                <a id="register" href="/register">Register Now</a>
+            </p>
+        {% endif %}
+    </section>
+
+    <footer>
+        {% if user %}
+            <p><a href="/tasks">Go to your tasks</a></p>
+        {% else %}
+            <p>To join our ecosystem <a href="/register">Register</a> Already have an account <a href="/login">Login</a> to go to your account</p>
+        {% endif %}
+    </footer>
+</body>
+</html>

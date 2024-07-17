@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasks</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/tasks">Tasks</a>
+        </nav>
+    </header>
+
+    <h1>Tasks</h1>
+
+    <p>Your current points: {{ points }}</p>
+
+    <section class="task-section">
+        <h3>Task 1</h3>
+        <button onclick="completeTask(1)">Complete Task 1</button>
+    </section>
+
+    <section class="task-section">
+        <h3>Task 2</h3>
+        <button onclick="completeTask(2)">Complete Task 2</button>
+    </section>
+
+    <section class="task-section">
+        <h3>Task 3</h3>
+        <button onclick="completeTask(3)">Complete Task 3</button>
+    </section>
+
+    <footer>
+        <p><a href="/logout">Logout</a></p>
+    </footer>
+
+    <script>
+        function completeTask(taskId) {
+            fetch('/complete_task', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ task_id: taskId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Task completed! Your current points: ' + data.points);
+                    location.reload(); // Reload the page to update points
+                } else {
+                    alert('Error completing task: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>
