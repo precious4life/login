@@ -15,9 +15,9 @@ db = mysql.connector.connect(
 @app.route('/')
 def home():
     if 'user_id' in session:
-        cursor = db.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM users WHERE id = %s", (session['user_id'],))
-        user = cursor.fetchone()
+        with db.cursor(dictionary=True) as cursor:
+            cursor.execute("SELECT * FROM users WHERE id = %s", (session['user_id'],))
+            user = cursor.fetchone()
         return render_template('index.html', user=user)
     return render_template('index.html', user=None)
 
@@ -28,10 +28,15 @@ def register():
         email = request.form['email']
         password = generate_password_hash(request.form['password'])
         
-        cursor = db.cursor()
-        cursor.execute("INSERT INTO users (username, email, password) VALUES (%s, %s, %s)", (username, email, password))
-        db.commit()
+        try:
+            with db.cursor() as cursor:
+                cursor.execute("INSERT INTO users (username, email, password) VALUES (%s, %s, %s)", (username, email, password))
+                db.commit()
+        except mysql.connector.Error as err:
+            return f"Error: {err}"
+        
         return redirect(url_for('login'))
+    
     return render_template('index.html', user=None)
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -40,14 +45,16 @@ def login():
         username = request.form['username']
         password = request.form['password']
         
-        cursor = db.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
-        user = cursor.fetchone()
+        with db.cursor(dictionary=True) as cursor:
+            cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+            user = cursor.fetchone()
         
         if user and check_password_hash(user['password'], password):
             session['user_id'] = user['id']
             return redirect(url_for('home'))
+        
         return 'Login failed'
+    
     return render_template('index.html', user=None)
 
 @app.route('/logout')
@@ -60,9 +67,9 @@ def tasks():
     if 'user_id' not in session:
         return redirect(url_for('home'))
     
-    cursor = db.cursor(dictionary=True)
-    cursor.execute("SELECT points FROM users WHERE id = %s", (session['user_id'],))
-    user = cursor.fetchone()
+    with db.cursor(dictionary=True) as cursor:
+        cursor.execute("SELECT points FROM users WHERE id = %s", (session['user_id'],))
+        user = cursor.fetchone()
     
     return render_template('tasks.html', points=user['points'])
 
@@ -74,13 +81,15 @@ def complete_task():
     data = request.get_json()
     task_id = data.get('task_id')
     
-    cursor = db.cursor()
-    cursor.execute("INSERT INTO tasks (user_id, task_id) VALUES (%s, %s)", (session['user_id'], task_id))
-    cursor.execute("UPDATE users SET points = points + 10 WHERE id = %s", (session['user_id'],))
-    db.commit()
-    
-    cursor.execute("SELECT points FROM users WHERE id = %s", (session['user_id'],))
-    points = cursor.fetchone()[0]
+    try:
+        with db.cursor() as cursor:
+            cursor.execute("INSERT INTO tasks (user_id, task_id) VALUES (%s, %s)", (session['user_id'], task_id))
+            cursor.execute("UPDATE users SET points = points + 10 WHERE id = %s", (session['user_id'],))
+            db.commit()
+            cursor.execute("SELECT points FROM users WHERE id = %s", (session['user_id'],))
+            points = cursor.fetchone()[0]
+    except mysql.connector.Error as err:
+        return jsonify(success=False, message=f"Error: {err}")
     
     return jsonify(success=True, points=points)
 
