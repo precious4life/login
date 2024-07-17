@@ -16,7 +16,7 @@
 
     <h1>Tasks</h1>
 
-    <p>Your current points: {{ points }}</p>
+    <p>Your current points: <span id="currentPoints">{{ points }}</span></p>
 
     <section class="task-section">
         <h3>Task 1</h3>
@@ -26,6 +26,7 @@
     <section class="task-section">
         <h3>Task 2</h3>
         <button onclick="completeTask(2)">Complete Task 2</button>
+        <a href="https://www.youtube.com" onclick="addPointsAfterDelay(5)">Add Points after 5s</a>
     </section>
 
     <section class="task-section">
@@ -50,7 +51,7 @@
             .then(data => {
                 if (data.success) {
                     alert('Task completed! Your current points: ' + data.points);
-                    location.reload(); // Reload the page to update points
+                    document.getElementById('currentPoints').innerText = data.points;
                 } else {
                     alert('Error completing task: ' + data.message);
                 }
@@ -58,6 +59,16 @@
             .catch(error => {
                 console.error('Error:', error);
             });
+        }
+
+        function addPointsAfterDelay(seconds) {
+            setTimeout(function() {
+                let currentPoints = parseInt(document.getElementById('currentPoints').innerText);
+                let additionalPoints = 10; // Adjust this value as needed
+                let newPoints = currentPoints + additionalPoints;
+                document.getElementById('currentPoints').innerText = newPoints;
+                alert('Points added after ' + seconds + ' seconds! New points: ' + newPoints);
+            }, seconds * 1000);
         }
     </script>
 </body>
